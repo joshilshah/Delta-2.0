@@ -1,0 +1,173 @@
+@import "tailwindcss";
+
+/* =========================================================================
+   Delta design system
+   Two moods, one identity: "paper" (passengers, day) and "night" (driver cockpit).
+   Semantic colours are CSS variables so every component adapts to the theme.
+   ========================================================================= */
+
+/* Light ("paper"). Muted text is #5F6672: 5.1:1 on paper and 5.8:1 on white (WCAG AA for small text). */
+:root {
+  --c-bg: #F3F1EA;          /* warm paper */
+  --c-surface: #FFFFFF;
+  --c-surface-2: #F8F7F2;
+  --c-fg: #0E1116;          /* ink */
+  --c-fg-soft: #3E4552;
+  --c-muted: #5F6672;
+  --c-line: #E4E0D5;
+  --c-live: #2F5BFF;        /* "live" accent: Delta blue on light, signal volt on dark */
+  --c-cta-bg: #0E1116;      /* primary action surface: ink on light, volt on dark */
+  --c-cta-fg: #FFFFFF;
+  --c-shadow: 14 17 22;
+  color-scheme: light;
+}
+/* Dark, grey: soft charcoal, easier on the eyes for long sessions. */
+.theme-night {
+  --c-bg: #0B0E13;
+  --c-surface: #12161D;
+  --c-surface-2: #191E27;
+  --c-fg: #F2F4F7;
+  --c-fg-soft: #C3C9D3;
+  --c-muted: #8A93A3;
+  --c-line: #262C37;
+  --c-live: #D7FF3C;
+  --c-cta-bg: #D7FF3C;
+  --c-cta-fg: #0E1116;
+  --c-shadow: 0 0 0;
+  color-scheme: dark;
+}
+/* Dark, AMOLED: true black (pixels off on OLED screens), with lifted surfaces so cards stay legible. */
+.theme-amoled.theme-night, .theme-amoled .theme-night {
+  --c-bg: #000000;
+  --c-surface: #0B0B0D;
+  --c-surface-2: #141417;
+  --c-line: #232328;
+  --c-muted: #8E8E98;
+}
+
+@theme inline {
+  --color-canvas: var(--c-bg);
+  --color-surface: var(--c-surface);
+  --color-surface-2: var(--c-surface-2);
+  --color-fg: var(--c-fg);
+  --color-fg-soft: var(--c-fg-soft);
+  --color-muted: var(--c-muted);
+  --color-line: var(--c-line);
+  --color-live: var(--c-live);
+}
+
+@theme {
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --color-ink: #0E1116;      /* always dark */
+  --color-night: #090C11;
+  --color-paper: #F3F1EA;    /* always light */
+  --color-accent: #2F5BFF;   /* Delta blue */
+  --color-accent-dark: #1E44E0;
+  --color-volt: #D7FF3C;     /* signal: anything live */
+  --color-success: #16A34A;
+  --color-danger: #E5484D;
+
+  --animate-rise: rise 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-pop: pop 0.5s cubic-bezier(0.2, 1.5, 0.4, 1) both;
+  --animate-radar: radar 2.4s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-shimmer: shimmer 1.4s linear infinite;
+  --animate-nudge: nudge 1.6s ease-in-out infinite;
+}
+
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes pop { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: none; } }
+@keyframes radar { from { transform: scale(0.35); opacity: 0.6; } to { transform: scale(2.6); opacity: 0; } }
+@keyframes float { 0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); } 50% { transform: translateY(-10px) rotate(var(--r, 0deg)); } }
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+@keyframes nudge { 0%, 100% { transform: translateX(0); opacity: 0.35; } 50% { transform: translateX(6px); opacity: 1; } }
+@keyframes dash { to { stroke-dashoffset: -48; } }
+@keyframes grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes growx { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes draw { from { stroke-dashoffset: var(--len, 600); } to { stroke-dashoffset: 0; } }
+@keyframes blink { 50% { opacity: 0; } }
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.reveal.in { opacity: 1; transform: none; }
+
+@layer base {
+  html { background: var(--c-bg); }
+  body { @apply bg-canvas font-sans text-fg antialiased; font-feature-settings: "ss01", "cv11"; }
+  h1, h2, h3 { @apply tracking-[-0.025em]; }
+  ::selection { background: var(--color-volt); color: var(--color-ink); }
+  :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  }
+}
+
+@layer components {
+  /* Page container for the public pages: wide enough to use large screens, with gutters that grow with them. */
+  .wrap { @apply mx-auto w-full max-w-[1360px] px-5 sm:px-8 lg:px-12 2xl:max-w-[1600px] 2xl:px-16; }
+  /* Full-bleed sections (hero over the map): nearly edge to edge on big screens. */
+  .wrap-wide { @apply mx-auto w-full max-w-[1840px] px-5 sm:px-8 lg:px-14 2xl:px-20; }
+  .card { @apply rounded-3xl bg-surface p-5 ring-1 ring-line sm:p-6; }
+  .sheet { @apply rounded-[28px] bg-surface text-fg ring-1 ring-line; box-shadow: 0 30px 80px -30px rgb(var(--c-shadow) / 0.45), 0 2px 6px rgb(var(--c-shadow) / 0.06); }
+  .eyebrow { @apply text-[11px] font-medium uppercase tracking-[0.14em] text-muted; }
+  .serif { @apply font-serif font-normal italic tracking-normal; }
+  .num { @apply tabular-nums tracking-[-0.03em]; }
+  .mono { @apply font-mono text-[13px]; }
+  .chip { @apply inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1.5 text-xs font-medium text-fg-soft ring-1 ring-line; }
+
+  .btn-primary, .btn-accent, .btn-volt, .btn-success, .btn-outline, .btn-ghost, .btn-danger {
+    @apply inline-flex select-none items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition
+      active:scale-[0.97] disabled:pointer-events-none disabled:opacity-45;
+  }
+  .btn-primary { background: var(--c-fg); color: var(--c-bg); }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-accent { @apply bg-accent text-white shadow-[0_10px_30px_-10px_rgba(47,91,255,0.75)] hover:bg-accent-dark; }
+  .btn-volt { background: var(--c-cta-bg); color: var(--c-cta-fg); }
+  .btn-volt:hover { filter: brightness(0.95); }
+  /* A "moment" surface (active trip, trip fare, today's earnings): ink on light, volt on dark.
+     Re-points the semantic colours so anything inside stays readable. */
+  .cta-surface {
+    background: var(--c-cta-bg); color: var(--c-cta-fg);
+    --c-fg: var(--c-cta-fg); --c-surface: var(--c-cta-bg);
+    --c-muted: color-mix(in srgb, var(--c-cta-fg) 62%, transparent);
+    --c-line: color-mix(in srgb, var(--c-cta-fg) 28%, transparent);
+  }
+  .btn-success { @apply bg-success text-white hover:brightness-110; }
+  .btn-outline { @apply bg-surface text-fg ring-1 ring-line hover:bg-surface-2; }
+  .btn-ghost { @apply text-fg-soft hover:bg-surface-2 hover:text-fg; }
+  .btn-danger { @apply bg-transparent text-danger ring-1 ring-danger/30 hover:bg-danger/10; }
+  .btn-lg { @apply px-6 py-4 text-base; }
+  .btn-icon { @apply h-10 w-10 !p-0; }
+
+  .input { @apply w-full rounded-2xl bg-surface-2 px-4 py-3.5 text-[15px] text-fg ring-1 ring-line outline-none transition
+    placeholder:text-muted focus:bg-surface focus:ring-2 focus:ring-accent disabled:opacity-60; }
+  .label { @apply mb-1.5 block text-[13px] font-medium text-fg-soft; }
+  .skeleton { @apply animate-shimmer rounded-xl; background-image: linear-gradient(90deg, var(--c-surface-2) 25%, var(--c-line) 50%, var(--c-surface-2) 75%); background-size: 200% 100%; }
+}
+
+/* ---------------- Maps (Leaflet) ---------------- */
+.delta-map { background: var(--c-surface-2); font-family: var(--font-sans); }
+.delta-map .leaflet-container { background: transparent; font: inherit; }
+/* Neutral, slightly cool grey basemap: it sits quietly under the warm paper UI and lets the blue route and Δ pins lead. */
+.delta-map .leaflet-tile-pane { filter: grayscale(1) sepia(0.1) hue-rotate(180deg) saturate(0.55) brightness(1.04) contrast(0.92); }
+/* Night basemap (dark themes, driver cockpit, hero sections). */
+.delta-map.night { background: #0d1117; }
+.delta-map.night .leaflet-tile-pane { filter: invert(1) hue-rotate(185deg) grayscale(0.92) brightness(0.72) contrast(1.15); }
+/* AMOLED: deeper map so it blends with true-black surfaces. */
+.theme-amoled .delta-map.night { background: #000; }
+.theme-amoled .delta-map.night .leaflet-tile-pane { filter: invert(1) hue-rotate(185deg) grayscale(1) brightness(0.55) contrast(1.3); }
+.delta-route { stroke-dasharray: 2 12; animation: dash 1.4s linear infinite; }
+.delta-map .leaflet-control-attribution { @apply rounded-tl-lg !bg-white/70 !px-1.5 text-[10px] !text-[#596170]; }
+.delta-map.night .leaflet-control-attribution { @apply !bg-black/50 !text-[#9aa3b2]; }
+.delta-map .leaflet-control-attribution a { color: inherit; }
+.delta-map .leaflet-bar { @apply overflow-hidden !rounded-2xl !border-0 shadow-lg; }
+.delta-map .leaflet-bar a { @apply !h-9 !w-9 !border-line !bg-surface !leading-9 !text-fg; }
+.leaflet-tooltip.delta-tip {
+  background: var(--color-ink); color: #fff; border: 0; border-radius: 999px; box-shadow: 0 6px 16px -6px rgb(0 0 0 / 0.5);
+  padding: 3px 9px; font: 600 11px/1.4 var(--font-sans); letter-spacing: 0.01em;
+}
+.leaflet-tooltip-top.delta-tip::before { border-top-color: var(--color-ink); }
+.night .leaflet-tooltip.delta-tip { background: var(--color-volt); color: var(--color-ink); }
+.night .leaflet-tooltip-top.delta-tip::before { border-top-color: var(--color-volt); }
