@@ -145,12 +145,15 @@ Live today: website **https://delta-pi-ochre.vercel.app**, API **https://delta-a
 
 After changing any variable, **redeploy** that project (variables are read at build/start time).
 
-**Deploying an update** from your computer (one-time `npx vercel login` first). In Windows PowerShell use `npx.cmd`:
+**Deploying an update: just push to GitHub.** Both projects are connected to `github.com/joshilshah/Delta-2.0` (Vercel → project → *Settings → Git*; Root Directory `frontend` for `delta`, `backend` for `delta-api`). Every push to `main` deploys both to production; pushes to other branches get preview deployments.
+```powershell
+git add -A; git commit -m "Describe the change"; git push
+```
+Manual deploys still work if you ever need one (one-time `npx vercel login` first; in Windows PowerShell use `npx.cmd`):
 ```powershell
 cd backend;  npx.cmd vercel deploy --prod
 cd frontend; npx.cmd vercel deploy --prod
 ```
-Or connect each project to your GitHub repo in Vercel (*Settings → Git*, Root Directory `backend` or `frontend`) and every push deploys automatically.
 
 **Region matters most for speed.** Run the API in the Vercel region closest to your Supabase database, because one page needs several database queries. Your database is in Sydney (`ap-southeast-2`), so `backend/vercel.json` sets `"regions": ["syd1"]` (one query ≈ 20 ms instead of 250–780 ms from the US default). `GET /health` reports `db_ms` and `region` so you can check. If you create the Supabase project in another region, change `regions` to match (e.g. Mumbai `ap-south-1` → `bom1`, Singapore → `sin1`, US East → `iad1`).
 
