@@ -4,6 +4,8 @@ A real-time ride-hailing web app with a **rider app** and a **driver app**.
 Riders see an itemised fare before booking, get matched with the nearest driver, follow the car live on a map, chat or call the driver, and share their trip.
 Drivers go online, accept requests, navigate to the pickup, mark arrival, and track their earnings.
 
+**Live demo:** https://delta-pi-ochre.vercel.app (deployment guide: [docs/SETUP.md § Deploy to Vercel](docs/SETUP.md#7-deploy-to-vercel))
+
 > **Demo project.** Drivers are **unverified** (no licence or vehicle checks) and fares are estimates. Do not use it as a real transport service.
 
 ---
@@ -80,7 +82,7 @@ ride-hailing/
 │   │   ├── validation/    Request schemas (zod)
 │   │   └── config/        Prices, matching radii, timings (env-configurable)
 │   ├── scripts/           Demo data seeder and an end-to-end check
-│   └── tests/             69 automated tests (run against real Postgres via PGlite)
+│   └── tests/             73 automated tests (run against real Postgres via PGlite)
 ├── supabase/
 │   └── migrations/        Database schema, SQL functions, security rules (run in order)
 └── docs/                  Setup, architecture, features, editing guide, testing

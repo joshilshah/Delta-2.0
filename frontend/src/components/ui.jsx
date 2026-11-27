@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AlertCircle, CheckCircle2, Info, Loader2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Eye, EyeOff, Info, Loader2 } from 'lucide-react';
 import { STATUS_LABEL } from '../lib/format.js';
 
 export function Spinner({ className = '' }) {
@@ -92,6 +92,21 @@ export function FullPageSpinner() {
     <div className="grid min-h-screen place-items-center" role="status" aria-label="Loading">
       <span aria-hidden className="h-11 w-12 animate-pulse bg-fg"
         style={{ mask: 'url(/brand/delta-mark.png) center / contain no-repeat', WebkitMask: 'url(/brand/delta-mark.png) center / contain no-repeat' }} />
+    </div>
+  );
+}
+
+/** Password field with a show/hide toggle. Takes the same props as <input>; `type` is managed here. */
+export function PasswordInput({ id, className = 'input', ...props }) {
+  const [shown, setShown] = useState(false);
+  return (
+    <div className="relative">
+      <input id={id} {...props} type={shown ? 'text' : 'password'} className={`${className} pr-12`} />
+      <button type="button" onClick={() => setShown((s) => !s)} aria-pressed={shown} aria-controls={id}
+        aria-label={shown ? 'Hide password' : 'Show password'} title={shown ? 'Hide password' : 'Show password'}
+        className="absolute inset-y-0 right-1.5 my-auto grid h-10 w-10 place-items-center rounded-full text-muted transition hover:bg-surface-2 hover:text-fg">
+        {shown ? <EyeOff className="h-5 w-5" aria-hidden /> : <Eye className="h-5 w-5" aria-hidden />}
+      </button>
     </div>
   );
 }

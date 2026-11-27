@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { asyncHandler as h } from '../middleware/errorHandler.js';
 import { AppError } from '../errors.js';
 
-export function createRouter({ controllers: c, auth }) {
+export function createRouter({ controllers: c, auth, store }) {
   const router = Router();
   const { authenticate, requireRole } = auth;
   const passenger = requireRole('passenger');
@@ -20,6 +20,23 @@ export function createRouter({ controllers: c, auth }) {
   router.use((req, _res, next) => (req.user.profile.needs_onboarding
     ? next(new AppError(403, 'ONBOARDING_REQUIRED', 'Finish setting up your account first.'))
     : next()));
+
+  // Admin dashboard: only accounts listed in app_admins (checked on every request).
+  const admin = async (req, _res, next) => {
+    const ok = await store.isAdmin(req.user.id).catch(() => false);
+    next(ok ? undefined : new AppError(403, 'ADMIN_ONLY', 'This area is for Delta admins only.'));
+  };
+  router.get('/admin/overview', admin, h(c.adminOverview));
+  router.get('/admin/rides', admin, h(c.adminRides));
+  router.post('/admin/rides/:id/action', admin, h(c.adminRideAction));
+  router.get('/admin/drivers', admin, h(c.adminDrivers));
+  router.post('/admin/drivers/:id/offline', admin, h(c.adminDriverOffline));
+  router.get('/admin/users', admin, h(c.adminUsers));
+  router.get('/admin/support/tickets', admin, h(c.adminTickets));
+  router.get('/admin/support/tickets/:id', admin, h(c.adminTicket));
+  router.post('/admin/support/tickets/:id/respond', admin, h(c.adminRespond));
+  router.get('/admin/settings', admin, h(c.adminSettings));
+  router.put('/admin/settings/autopilot', admin, h(c.adminSetAutopilot));
 
   // Fare calculation (passengers)
   router.post('/fares/estimate', passenger, h(c.estimateFare));

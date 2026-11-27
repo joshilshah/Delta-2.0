@@ -85,6 +85,8 @@ A database trigger rejects any other transition. "Arrived" is a timestamp inside
 | `emergency_contacts`, `saved_places` | Per-user safety contacts and Home / Work / favourites | 5 |
 | `support_tickets`, `support_ticket_updates` | Support requests and their status timeline | 5 |
 | `ride_log` (view) | Readable report of every booking | 5 |
+| `app_admins` | Accounts allowed into `/admin` (no browser access) | 6 |
+| `app_settings` | Live switches set from the admin dashboard, e.g. `demo_autopilot` (no browser access) | 6 |
 
 ## API
 
@@ -119,6 +121,8 @@ All routes are under `/api` and need a Supabase sign-in token, except the `publi
 | POST | `/drivers/location` | driver | Share location |
 | GET | `/drivers/offers`, `/drivers/earnings` | driver | Pending requests, earnings |
 | POST | `/offers/:id/accept`, `/reject` | driver | Respond to a request |
+
+**Admin** (`/api/admin/*`, only for accounts in `app_admins`; checked on every request): `GET overview`, `GET rides?filter=live|completed|cancelled|all`, `POST rides/:id/action` (`cancel` / `complete`), `GET drivers`, `POST drivers/:id/offline`, `GET users`, `GET support/tickets?filter=…`, `GET support/tickets/:id`, `POST support/tickets/:id/respond`, `GET settings`, `PUT settings/autopilot`.
 
 Errors always look like `{ "error": { "code": "…", "message": "…" } }`.
 

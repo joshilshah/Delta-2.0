@@ -1,8 +1,8 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import AuthFrame from '../components/AuthFrame.jsx';
 import GoogleButton, { OrDivider } from '../components/GoogleButton.jsx';
-import { Alert, Spinner } from '../components/ui.jsx';
+import { Alert, PasswordInput, Spinner } from '../components/ui.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 
 export default function Login() {
@@ -32,7 +32,7 @@ export default function Login() {
         <div><label className="label" htmlFor="email">Email</label>
           <input id="email" type="email" required autoComplete="email" className="input" value={form.email} onChange={set('email')} /></div>
         <div><label className="label" htmlFor="password">Password</label>
-          <input id="password" type="password" required autoComplete="current-password" className="input" value={form.password} onChange={set('password')} /></div>
+          <PasswordInput id="password" required autoComplete="current-password" value={form.password} onChange={set('password')} /></div>
         <button className="btn-primary btn-lg w-full" disabled={busy || !configured}>{busy && <Spinner />} Log in</button>
         <p className="text-sm text-muted">New to Delta? <Link to="/signup" className="font-semibold text-fg underline underline-offset-4">Create an account</Link></p>
       </form>

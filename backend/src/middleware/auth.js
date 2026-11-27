@@ -1,14 +1,31 @@
 import { AppError } from '../errors.js';
 
-/** Build a token verifier backed by Supabase Auth (validates the JWT with the Auth server). */
+/**
+ * Build a token verifier for Supabase access tokens.
+ * getClaims() checks the JWT signature locally against the project's published signing keys (fetched once and
+ * cached), so most requests need no round trip to Supabase Auth. Projects still on the legacy shared secret fall back
+ * to asking the Auth server, which getClaims() does automatically. Verified tokens are also cached briefly.
+ */
 export function createSupabaseTokenVerifier(authClient) {
+  const cache = new Map(); // token -> { user, until }
   return async function verifyToken(token) {
-    const { data, error } = await authClient.auth.getUser(token);
+    const hit = cache.get(token);
+    if (hit && hit.until > Date.now()) return hit.user;
+    const { data, error } = await authClient.auth.getClaims(token);
     if (error) {
-      if (error.status >= 400 && error.status < 500) return null; // bad / expired token
+      if (error.status === undefined || (error.status >= 400 && error.status < 500)) return null; // bad / expired token
       throw new AppError(503, 'AUTH_UNAVAILABLE', 'Authentication service is unavailable.');
     }
-    return data?.user ? { id: data.user.id, email: data.user.email } : null;
+    const claims = data?.claims;
+    if (!claims?.sub) return null;
+    const user = { id: claims.sub, email: claims.email };
+    // Never trust past the token's own expiry; at most 60 s, so sign-outs and bans apply quickly.
+    const until = Math.min(Date.now() + 60_000, (claims.exp ?? 0) * 1000);
+    if (until > Date.now()) {
+      if (cache.size > 2000) cache.clear();
+      cache.set(token, { user, until });
+    }
+    return user;
   };
 }
 

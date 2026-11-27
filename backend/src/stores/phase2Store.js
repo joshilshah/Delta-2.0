@@ -72,6 +72,35 @@ export function createPhase2Store(t) {
       where: { status, updated_at: { lt: olderThanIso } }, order: ['updated_at', 'asc'], limit: 25,
     }),
 
+    // ---- admin ----
+    async isAdmin(userId) { return (await first('app_admins', { where: { user_id: userId } })) !== null; },
+    listAdminIds: async () => (await t.rows('app_admins', { columns: 'user_id', limit: 500 })).map((r) => r.user_id),
+    getSetting: (key) => first('app_settings', { where: { key } }),
+    async setSetting(key, value, userId) {
+      const fields = { value, updated_at: new Date().toISOString(), updated_by: userId ?? null };
+      const [row] = await t.update('app_settings', { key }, fields);
+      return row ?? t.insert('app_settings', { key, ...fields });
+    },
+    countWhere: (table, where) => t.count(table, where),
+    rideLog: ({ statuses, limit = 50 } = {}) => t.rows('ride_log', {
+      where: statuses ? { status: { in: statuses } } : {}, order: ['booked_at_ist', 'desc'], limit,
+    }),
+    listAllDrivers: () => t.rows('drivers', { order: ['created_at', 'desc'], limit: 300 }),
+    listProfilesByIds: (ids) => (ids.length ? t.rows('profiles', { where: { id: { in: ids } } }) : []),
+    listDriverLocations: (ids) => (ids.length ? t.rows('driver_locations', { where: { driver_id: { in: ids } } }) : []),
+    listRecentProfiles: (limit = 300) => t.rows('profiles', { order: ['created_at', 'desc'], limit }),
+    listAllTickets: ({ statuses, limit = 100 } = {}) => t.rows('support_tickets', {
+      where: statuses ? { status: { in: statuses } } : {}, order: ['updated_at', 'desc'], limit,
+    }),
+
+    // ---- demo autopilot ----
+    listProfilesByEmails: (emails) => t.rows('profiles', { where: { email: { in: emails } }, columns: 'id, email, full_name' }),
+    listDriversByProfileIds: (ids) => t.rows('drivers', { where: { profile_id: { in: ids } } }),
+    listPendingOffersForDriverIds: (ids) => (ids.length
+      ? t.rows('ride_offers', { where: { driver_id: { in: ids }, status: 'pending' } }) : []),
+    getDriverLocationRow: (driverId) => first('driver_locations', { where: { driver_id: driverId } }),
+    firstTrackingEvent: (rideId) => first('ride_tracking_events', { where: { ride_id: rideId }, order: ['recorded_at', 'asc'] }),
+
     // ---- account overview ----
     listRideStatsRows: (where) => t.rows('rides', {
       where, columns: 'status, estimated_fare, distance_km, created_at', order: ['created_at', 'desc'], limit: 5000,

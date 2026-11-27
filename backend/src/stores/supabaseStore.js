@@ -62,6 +62,7 @@ export function createSupabaseStore(db) {
   return {
     ...createPhase2Store(tableOps),
     markArrived: (rideId, driverId) => rpc('mark_arrived', { p_ride_id: rideId, p_driver_id: driverId }),
+    adminCancelRide: (rideId) => rpc('admin_cancel_ride', { p_ride_id: rideId }),
 
     async ping() {
       check(await db.from('profiles').select('id').limit(1));

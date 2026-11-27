@@ -102,6 +102,12 @@ describe('Phase 2', () => {
     assert.equal(row.passenger_phone, p1.phone);
     assert.equal(row.driver_name, d1.name);
     assert.equal(Number(row.offers_sent), 1);
+    // *_ist columns are India Standard Time clock values: exactly UTC + 5:30.
+    // Compared inside Postgres, so the test machine's own timezone can't skew it.
+    const { rows: [diff] } = await db.query(
+      `select round(extract(epoch from (l.booked_at_ist - (r.created_at at time zone 'UTC'))) / 60) as minutes
+         from public.ride_log l join public.rides r on r.id = l.ride_id where l.ride_id = $1`, [id]);
+    assert.equal(Number(diff.minutes), 330, 'booked_at_ist = UTC + 05:30');
     const { rows: [priv] } = await db.query(`select has_table_privilege('authenticated', 'public.ride_log', 'select') ok`);
     assert.equal(priv.ok, false);
   });

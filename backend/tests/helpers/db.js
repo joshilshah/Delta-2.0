@@ -37,7 +37,7 @@ export async function createTestDb() {
 let counter = 0;
 
 /** Create a Supabase-Auth user; the real signup trigger creates the profile (+ driver row). */
-export async function createUser(db, { role = 'passenger', name, phone, vehicle } = {}) {
+export async function createUser(db, { role = 'passenger', name, phone, vehicle, email } = {}) {
   counter += 1;
   const meta = {
     role,
@@ -47,7 +47,7 @@ export async function createUser(db, { role = 'passenger', name, phone, vehicle 
   };
   const { rows: [user] } = await db.query(
     'insert into auth.users (email, raw_user_meta_data) values ($1, $2::jsonb) returning id',
-    [`u${counter}@test.local`, JSON.stringify(meta)],
+    [email ?? `u${counter}@test.local`, JSON.stringify(meta)],
   );
   if (role === 'passenger') return { id: user.id, role, phone: meta.phone, name: meta.full_name };
   const { rows: [driver] } = await db.query('select id from public.drivers where profile_id = $1', [user.id]);

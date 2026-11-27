@@ -8,8 +8,9 @@ const STOP_REASONS = new Set(['RIDE_HAS_PENDING', 'RIDE_NOT_SEARCHING', 'RIDE_NO
  * On reject/expiry the next eligible driver is tried; if none remain the ride becomes `unmatched`.
  * All state lives in the database, so any backend instance (or a restart) can continue a dispatch.
  */
-export function createDispatchService({ store, matching, logger = console }) {
-  async function dispatchRide(rideId) {
+export function createDispatchService({ store, matching, logger = console, onNoDrivers }) {
+  // onNoDrivers(ride) -> true if it made a driver available (demo autopilot); dispatch then tries once more.
+  async function dispatchRide(rideId, { fallbackTried = false } = {}) {
     const ride = await store.getRide(rideId);
     if (!ride || !['requested', 'searching'].includes(ride.status)) return { outcome: 'skipped' };
 
@@ -41,7 +42,14 @@ export function createDispatchService({ store, matching, logger = console }) {
       }
     }
 
-    // Step 5: nobody left.
+    // Step 5: nobody left. In demo mode an autopilot driver may step in first.
+    if (onNoDrivers && !fallbackTried) {
+      try {
+        if (await onNoDrivers(ride)) return dispatchRide(rideId, { fallbackTried: true });
+      } catch (err) {
+        logger.warn?.(`[dispatch] demo fallback failed: ${err.message}`);
+      }
+    }
     const updated = await store.markUnmatched(rideId);
     return { outcome: updated.status === 'unmatched' ? 'unmatched' : 'skipped' };
   }

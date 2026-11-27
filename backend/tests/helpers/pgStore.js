@@ -50,6 +50,7 @@ export function createPgStore(db) {
   const store = {
     ...createPhase2Store(tableOps),
     markArrived: (rid, did) => fn('public.mark_arrived($1,$2)', [rid, did]),
+    adminCancelRide: (rid) => fn('public.admin_cancel_ride($1)', [rid]),
     ping: async () => { await q('select 1'); return true; },
     getProfile: (id) => one('select * from public.profiles where id = $1', [id]),
     completeOnboarding: (id, r) => fn('public.complete_onboarding($1,$2,$3,$4,$5)',

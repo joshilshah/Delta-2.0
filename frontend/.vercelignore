@@ -1,0 +1,7 @@
+# Never upload secrets or local installs/builds to Vercel (values are set as Vercel environment variables instead).
+.env
+.env.*
+!.env.example
+node_modules
+dist
+*.log

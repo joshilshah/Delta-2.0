@@ -71,6 +71,7 @@ ok(sys, `automated message to passenger: "${sys?.body}"`);
 
 await call(D, 'POST', `/rides/${id}/start`);
 await call(D, 'POST', `/rides/${id}/complete`);
-const { data: done } = await admin.from('ride_log').select('status, arrived_at, completed_at, messages').eq('ride_id', id).single();
-ok(done.status === 'completed' && done.arrived_at && Number(done.messages) === 3, 'ride_log shows completed with arrival time and 3 messages');
+const { data: done } = await admin.from('ride_log').select('status, arrived_at_ist, completed_at_ist, messages').eq('ride_id', id).single();
+ok(done.status === 'completed' && done.arrived_at_ist && Number(done.messages) === 3,
+  `ride_log shows completed (IST ${done.completed_at_ist}) with arrival time and 3 messages`);
 console.log('\nAll good.');

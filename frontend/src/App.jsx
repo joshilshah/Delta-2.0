@@ -21,6 +21,7 @@ const TripDetail = lazy(() => import('./pages/TripDetail.jsx'));
 const Support = lazy(() => import('./pages/Support.jsx'));
 const SharedTrip = lazy(() => import('./pages/SharedTrip.jsx'));
 const Story = lazy(() => import('./pages/Story.jsx'));
+const Admin = lazy(() => import('./pages/Admin.jsx'));
 
 function PublicOnly({ children }) {
   const { me } = useAuth();
@@ -38,6 +39,8 @@ export default function App() {
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/share/:token" element={<SharedTrip />} />
         <Route path="/story" element={<Story />} />
+        {/* Admin dashboard: any signed-in account listed in app_admins (the page and the API both check). */}
+        <Route path="/admin" element={<Admin />} />
 
         <Route element={<ProtectedRoute role="passenger" />}>
           {/* Home and Book were the same job: one Ride screen serves both routes. */}

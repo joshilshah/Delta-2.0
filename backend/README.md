@@ -5,7 +5,7 @@ The API that holds all the business rules and talks to Supabase. Setup and env v
 ```powershell
 npm install
 npm start              # http://localhost:3000  (health: /health)
-npm test               # 69 tests on a real Postgres (PGlite)
+npm test               # 73 tests on a real Postgres (PGlite)
 npm run lint
 npm run seed:demo      # demo rider + 3 drivers (add -- --watch during a demo)
 npm run e2e            # end-to-end ride against the running API

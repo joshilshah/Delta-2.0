@@ -1,8 +1,8 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, Navigate, Outlet, useLocation } from 'react-router-dom';
 import ThemeMenu from './ThemeMenu.jsx';
 import RideChat from './RideChat.jsx';
-import { ArrowRight, Clock3, LogOut, Navigation, UserRound, Wallet, WifiOff } from 'lucide-react';
+import { ArrowRight, Clock3, LogOut, Navigation, ShieldCheck, UserRound, Wallet, WifiOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { LiveProvider, useLiveData } from '../context/LiveContext.jsx';
 import { Alert, Avatar, FullPageSpinner } from './ui.jsx';
@@ -35,9 +35,13 @@ export function Wordmark({ className = '', tagline = false }) {
   );
 }
 
+/** The logo always leads to the home page; if you're already there, it scrolls back to the top. */
 export function Logo({ to = '/', light = false }) {
+  const { pathname, hash } = useLocation();
+  // Already home: glide to the top. Coming from another page: start the home page at the top.
+  const onClick = () => window.scrollTo({ top: 0, behavior: pathname === to && !hash ? 'smooth' : 'auto' });
   return (
-    <Link to={to} aria-label="Delta home" className={`group flex items-center gap-2.5 text-[18px] ${light ? 'text-white' : 'text-fg'}`}>
+    <Link to={to} onClick={onClick} aria-label="Delta home" className={`group flex items-center gap-2.5 text-[18px] ${light ? 'text-white' : 'text-fg'}`}>
       <Mark className="h-7 w-8 transition-transform duration-500 group-hover:-translate-y-0.5 group-hover:rotate-[-4deg]" />
       <Wordmark />
     </Link>
@@ -86,7 +90,7 @@ function TopBar() {
     <header className="sticky top-0 z-40 h-16 border-b border-line bg-canvas/85 backdrop-blur-xl">
       <div className="mx-auto flex h-full max-w-[1400px] items-center justify-between gap-4 px-4 sm:px-6">
         <div className="flex items-center gap-8">
-          <Logo to={`/${role}/dashboard`} />
+          <Logo />
           <nav className="hidden items-center gap-1 rounded-full bg-surface-2 p-1 ring-1 ring-line md:flex" aria-label="Main">
             {tabs.map((t) => (
               <Link key={t.label} to={t.to} aria-current={t.active ? 'page' : undefined}
@@ -99,6 +103,11 @@ function TopBar() {
           </nav>
         </div>
         <div className="flex items-center gap-3">
+          {me.user.is_admin && (
+            <Link to="/admin" className="chip hidden !bg-fg !text-canvas !ring-0 transition hover:opacity-85 sm:inline-flex">
+              <ShieldCheck className="h-3.5 w-3.5" aria-hidden />Admin
+            </Link>
+          )}
           <Link to="/story" className="hidden text-sm font-medium text-muted transition hover:text-fg lg:block">Our story</Link>
           {role === 'driver' && <OnlineChip />}
           <ThemeMenu />

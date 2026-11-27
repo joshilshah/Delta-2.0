@@ -51,5 +51,11 @@ export function loadConfig(env = process.env) {
       stopMinutes: num(env.ALERT_STOP_MINUTES, 5),
     },
     support: { triageAfterSeconds: num(env.SUPPORT_TRIAGE_SECONDS, 60) },
+
+    // Demo autopilot drivers for live demos (see services/demoService.js). Off unless DEMO_AUTOPILOT=on.
+    demo: {
+      enabled: env.DEMO_AUTOPILOT === 'on',
+      ...(env.DEMO_AUTOPILOT_EMAILS ? { emails: env.DEMO_AUTOPILOT_EMAILS.split(',').map((s) => s.trim()).filter(Boolean) } : {}),
+    },
   };
 }

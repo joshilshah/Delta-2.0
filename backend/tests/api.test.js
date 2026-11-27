@@ -1,4 +1,4 @@
-﻿import { test, describe, before, after, beforeEach } from 'node:test';
+import { test, describe, before, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { createTestDb, createUser, createOAuthUser, placeDriver, resetState, lapseOffer, PICKUP, DESTINATION, northKm } from './helpers/db.js';
 import { createPgStore } from './helpers/pgStore.js';

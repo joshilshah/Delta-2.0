@@ -83,6 +83,14 @@ export const ticketSchema = z.object({
   ride_id: z.string().uuid().nullish(),
 }).strict();
 export const ticketReplySchema = z.object({ message: z.string().trim().min(1).max(2000) }).strict();
+// ---- admin ----
+export const adminRideActionSchema = z.object({ action: z.enum(['cancel', 'complete']) }).strict();
+export const adminAutopilotSchema = z.object({ enabled: z.boolean() }).strict();
+export const adminRespondSchema = z.object({
+  status: z.enum(['open', 'in_review', 'resolved', 'closed']).optional(),
+  message: z.string().trim().max(2000).optional(),
+}).strict().refine((v) => v.status || v.message, { message: 'Add a reply or choose a status' });
+
 export const alertActionSchema = z.object({ action: z.enum(['dismiss', 'help']) }).strict();
 
 /** Parse or throw a 400 AppError with readable field messages. */
